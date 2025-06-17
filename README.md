@@ -27,4 +27,4 @@ Simple 5-hour session timer for Claude Code users. Tracks your daily sessions ju
 ## Requirements
 
 - Windows 10/11
-- Microsoft Edge (pre-installed)
+- Microsoft Edge (pre-installed)# Test push
