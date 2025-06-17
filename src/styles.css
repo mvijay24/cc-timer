@@ -175,23 +175,6 @@ body {
     transform: translateY(-2px);
 }
 
-.btn-end {
-    background: #ff6b6b;
-    color: #ffffff;
-}
-
-.btn-end:hover {
-    background: #ff5252;
-}
-
-.btn-reset {
-    background: #feca57;
-    color: #1a2332;
-}
-
-.btn-reset:hover {
-    background: #fdb834;
-}
 
 /* Daily Sessions Sidebar */
 .daily-sessions-sidebar {

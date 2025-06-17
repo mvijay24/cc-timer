@@ -112,6 +112,16 @@
   - ✅ Automatic session completion after 5 hours
   - ✅ Window width increased to 1000px to accommodate sidebar
 
+### Session Control Updates
+- **Removed Manual End/Reset:**
+  - ❌ Removed End Session button - sessions only end by time
+  - ❌ Removed Reset button - no manual interference
+  - ✅ Sessions run full 5 hours - no early termination
+  - ✅ Progress shows 100% before auto-ending
+  - ✅ Next session requires manual start
+  - ✅ Only one session can run at a time
+  - ✅ Mirrors Claude's actual session behavior
+
 ## Current Feature Approaches
 
 ### Approach 1: LocalStorage + Interval Tracking

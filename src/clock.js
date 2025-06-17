@@ -241,6 +241,12 @@ function updateTotalTime() {
 }
 
 function startSession() {
+    // Prevent multiple sessions at once
+    if (currentSessionIndex !== null && sessionStartTime !== null) {
+        alert('A session is already running!');
+        return;
+    }
+    
     sessionStartTime = new Date();
     
     // Check for existing active session
@@ -260,10 +266,8 @@ function startSession() {
     // Initialize arcs
     updateSessionArcs();
     
-    // Update UI
+    // Update UI - Hide start button, show session info
     document.getElementById('start-btn').style.display = 'none';
-    document.getElementById('end-btn').style.display = 'inline-block';
-    document.getElementById('reset-btn').style.display = 'inline-block';
     document.getElementById('session-info').style.display = 'block';
     
     // Update daily sessions display
@@ -282,7 +286,16 @@ function updateSessionProgress() {
     const remaining = SESSION_DURATION - elapsed;
     
     if (remaining <= 0) {
-        endSession();
+        // Session complete - show 100% progress before ending
+        document.getElementById('progress-percent').textContent = '100%';
+        document.getElementById('progress-fill').style.width = '100%';
+        SessionManager.updateSession(currentSessionIndex, { progress: 100 });
+        updateDailySessions();
+        
+        // Wait a moment to show completion
+        setTimeout(() => {
+            endSession();
+        }, 1000);
         return;
     }
     
@@ -338,10 +351,8 @@ function endSession() {
     document.getElementById('session-arc-elapsed').style.opacity = '0';
     document.getElementById('session-arc-remaining').style.opacity = '0';
     
-    // Reset UI
+    // Reset UI - Show start button again for next session
     document.getElementById('start-btn').style.display = 'inline-block';
-    document.getElementById('end-btn').style.display = 'none';
-    document.getElementById('reset-btn').style.display = 'none';
     document.getElementById('session-info').style.display = 'none';
     
     // Reset progress
@@ -350,10 +361,6 @@ function endSession() {
     
     // Update daily sessions display
     updateDailySessions();
-}
-
-function resetSession() {
-    endSession();
 }
 
 // Initialize
@@ -379,8 +386,6 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             // Resume UI state
             document.getElementById('start-btn').style.display = 'none';
-            document.getElementById('end-btn').style.display = 'inline-block';
-            document.getElementById('reset-btn').style.display = 'inline-block';
             document.getElementById('session-info').style.display = 'block';
             
             // Resume timer
@@ -390,10 +395,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
-    // Add event listeners
+    // Add event listener for start button only
     document.getElementById('start-btn').addEventListener('click', startSession);
-    document.getElementById('end-btn').addEventListener('click', endSession);
-    document.getElementById('reset-btn').addEventListener('click', resetSession);
 });
 
 // Prevent window from being closed accidentally
