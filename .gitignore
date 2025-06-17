@@ -1,0 +1,10 @@
+node_modules/
+target/
+Cargo.lock
+*.log
+.DS_Store
+Thumbs.db
+admin-log.txt
+admin-execution.log
+admin-command.ps1
+run-as-admin.bat
