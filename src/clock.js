@@ -25,6 +25,17 @@ const SessionManager = {
             // Reset for new day
             return { date: this.getTodayKey(), sessions: [] };
         }
+        
+        // Fix any sessions without proper endTime
+        stored.sessions.forEach((session, index) => {
+            if (session.progress >= 100 && !session.endTime) {
+                // Session marked as 100% but no endTime
+                const startTime = new Date(session.startTime);
+                const endTime = new Date(startTime.getTime() + SESSION_DURATION);
+                session.endTime = endTime.toISOString();
+            }
+        });
+        
         return stored;
     },
     
@@ -402,6 +413,12 @@ document.addEventListener('DOMContentLoaded', () => {
             updateSessionProgress();
             updateSessionArcs();
         }
+    } else {
+        // No active session - ensure clean state
+        sessionStartTime = null;
+        currentSessionIndex = null;
+        document.getElementById('start-btn').style.display = 'inline-block';
+        document.getElementById('session-info').style.display = 'none';
     }
     
     // Add event listener for start button only
