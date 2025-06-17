@@ -1,14 +1,7 @@
 {
   "name": "cc-timer",
-  "private": true,
-  "version": "0.1.0",
-  "type": "module",
-  "scripts": {
-    "tauri": "tauri",
-    "dev": "tauri dev",
-    "build": "tauri build"
-  },
-  "devDependencies": {
-    "@tauri-apps/cli": "^1.5.11"
-  }
+  "version": "1.0.0",
+  "description": "Claude Code Session Timer - 5 hour session tracker",
+  "author": "mvijay24",
+  "license": "MIT"
 }
