@@ -107,11 +107,6 @@ function startSession() {
     document.getElementById('end-btn').style.display = 'inline-block';
     document.getElementById('reset-btn').style.display = 'inline-block';
     document.getElementById('session-info').style.display = 'block';
-    document.getElementById('status-bar').style.display = 'flex';
-    
-    // Set session start time
-    const startTimeStr = sessionStartTime.toLocaleTimeString('en-US', { hour12: false });
-    document.getElementById('session-start-time').textContent = startTimeStr;
     
     // Start session timer
     sessionInterval = setInterval(updateSessionProgress, 1000);
@@ -144,7 +139,6 @@ function updateSessionProgress() {
     
     document.getElementById('elapsed-time').textContent = elapsedStr;
     document.getElementById('remaining-time').textContent = remainingStr;
-    document.getElementById('status-remaining').textContent = remainingStr;
 }
 
 function formatTime(milliseconds) {
@@ -173,7 +167,6 @@ function endSession() {
     document.getElementById('end-btn').style.display = 'none';
     document.getElementById('reset-btn').style.display = 'none';
     document.getElementById('session-info').style.display = 'none';
-    document.getElementById('status-bar').style.display = 'none';
     
     // Reset progress
     document.getElementById('progress-fill').style.width = '0%';
