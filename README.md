@@ -5,8 +5,12 @@ A standalone Windows application for tracking 5-hour coding sessions with a visu
 ## Features
 - Standalone Windows app (not browser-based)
 - 24-hour analog clock with digital time display
-- Visual 5-hour session arc indicator
-- Session progress tracking
+- Visual 5-hour session arc indicator (green for remaining, blue for elapsed)
+- Session progress tracking with percentage
+- Daily sessions table showing up to 5 sessions
+- Session persistence across app restarts
+- Automatic daily reset at midnight UTC
+- Total daily time tracking
 - System tray support
 - Always-on-top window option
 

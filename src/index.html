@@ -7,7 +7,8 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="app-container">
+    <div class="main-wrapper">
+        <div class="app-container">
         <div class="header">
             <h1>Claude Code Session Clock</h1>
             <div class="mode-toggle">
@@ -86,6 +87,71 @@
             </div>
             
         </div>
+    </div>
+    
+    <div class="daily-sessions-sidebar">
+        <h2>Today's Sessions</h2>
+        <div class="sessions-date" id="sessions-date">Loading...</div>
+        
+        <div class="sessions-list">
+            <div class="session-item" id="session-1">
+                <div class="session-header">
+                    <span class="session-number">Session 1</span>
+                    <span class="session-time" id="session-1-time">--:--</span>
+                </div>
+                <div class="session-progress-bar">
+                    <div class="session-progress-fill" id="session-1-progress"></div>
+                </div>
+            </div>
+            
+            <div class="session-item" id="session-2">
+                <div class="session-header">
+                    <span class="session-number">Session 2</span>
+                    <span class="session-time" id="session-2-time">--:--</span>
+                </div>
+                <div class="session-progress-bar">
+                    <div class="session-progress-fill" id="session-2-progress"></div>
+                </div>
+            </div>
+            
+            <div class="session-item" id="session-3">
+                <div class="session-header">
+                    <span class="session-number">Session 3</span>
+                    <span class="session-time" id="session-3-time">--:--</span>
+                </div>
+                <div class="session-progress-bar">
+                    <div class="session-progress-fill" id="session-3-progress"></div>
+                </div>
+            </div>
+            
+            <div class="session-item" id="session-4">
+                <div class="session-header">
+                    <span class="session-number">Session 4</span>
+                    <span class="session-time" id="session-4-time">--:--</span>
+                </div>
+                <div class="session-progress-bar">
+                    <div class="session-progress-fill" id="session-4-progress"></div>
+                </div>
+            </div>
+            
+            <div class="session-item" id="session-5">
+                <div class="session-header">
+                    <span class="session-number">Session 5</span>
+                    <span class="session-time" id="session-5-time">--:--</span>
+                </div>
+                <div class="session-progress-bar">
+                    <div class="session-progress-fill" id="session-5-progress"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="sessions-stats">
+            <div class="stat-item">
+                <span class="stat-label">Total Today:</span>
+                <span class="stat-value" id="total-time">0:00:00</span>
+            </div>
+        </div>
+    </div>
     </div>
     
     <script src="clock.js"></script>

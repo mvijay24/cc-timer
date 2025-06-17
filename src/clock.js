@@ -1,8 +1,78 @@
 let sessionStartTime = null;
 let sessionInterval = null;
 let clockInterval = null;
+let currentSessionIndex = null;
 
 const SESSION_DURATION = 5 * 60 * 60 * 1000; // 5 hours in milliseconds
+
+// Session Manager for localStorage
+const SessionManager = {
+    STORAGE_KEY: 'cc_timer_sessions',
+    
+    getTodayKey() {
+        // Use UTC date as key to sync with Claude server time
+        const today = new Date();
+        return today.toISOString().split('T')[0];
+    },
+    
+    loadTodaySessions() {
+        const data = localStorage.getItem(this.STORAGE_KEY);
+        if (!data) return { date: this.getTodayKey(), sessions: [] };
+        
+        const stored = JSON.parse(data);
+        // Check if it's today's data
+        if (stored.date !== this.getTodayKey()) {
+            // Reset for new day
+            return { date: this.getTodayKey(), sessions: [] };
+        }
+        return stored;
+    },
+    
+    saveSessions(sessions) {
+        const data = {
+            date: this.getTodayKey(),
+            sessions: sessions
+        };
+        localStorage.setItem(this.STORAGE_KEY, JSON.stringify(data));
+    },
+    
+    addSession(startTime) {
+        const data = this.loadTodaySessions();
+        const sessionIndex = data.sessions.length;
+        
+        if (sessionIndex >= 5) {
+            alert('Maximum 5 sessions per day reached!');
+            return null;
+        }
+        
+        data.sessions.push({
+            startTime: startTime.toISOString(),
+            endTime: null,
+            progress: 0
+        });
+        
+        this.saveSessions(data.sessions);
+        return sessionIndex;
+    },
+    
+    updateSession(index, updates) {
+        const data = this.loadTodaySessions();
+        if (data.sessions[index]) {
+            Object.assign(data.sessions[index], updates);
+            this.saveSessions(data.sessions);
+        }
+    },
+    
+    getCurrentSession() {
+        const data = this.loadTodaySessions();
+        // Find the active session (no endTime)
+        const activeIndex = data.sessions.findIndex(s => !s.endTime);
+        if (activeIndex !== -1) {
+            return { index: activeIndex, session: data.sessions[activeIndex] };
+        }
+        return null;
+    }
+};
 
 function updateClock() {
     const now = new Date();
@@ -96,8 +166,96 @@ function updateSessionArcs() {
     }
 }
 
+function updateDailySessions() {
+    const data = SessionManager.loadTodaySessions();
+    
+    // Update date display
+    const today = new Date();
+    const dateStr = today.toLocaleDateString('en-US', { 
+        weekday: 'short', 
+        month: 'short', 
+        day: 'numeric',
+        year: 'numeric'
+    });
+    document.getElementById('sessions-date').textContent = dateStr;
+    
+    // Update each session slot
+    for (let i = 0; i < 5; i++) {
+        const session = data.sessions[i];
+        const timeElement = document.getElementById(`session-${i + 1}-time`);
+        const progressElement = document.getElementById(`session-${i + 1}-progress`);
+        const itemElement = document.getElementById(`session-${i + 1}`);
+        
+        if (session) {
+            // Show start time in 12-hour format
+            const startTime = new Date(session.startTime);
+            const timeStr = startTime.toLocaleTimeString('en-US', { 
+                hour: 'numeric', 
+                minute: '2-digit',
+                hour12: true 
+            });
+            timeElement.textContent = timeStr;
+            
+            // Update progress
+            const progress = session.progress || 0;
+            progressElement.style.width = `${progress}%`;
+            
+            // Add active class if this is current session
+            if (i === currentSessionIndex && !session.endTime) {
+                itemElement.classList.add('active');
+            } else {
+                itemElement.classList.remove('active');
+            }
+            
+            // Show blue overlay for elapsed time
+            if (progress > 0) {
+                progressElement.style.setProperty('--progress', `${progress}%`);
+            }
+        } else {
+            // Empty slot
+            timeElement.textContent = '--:--';
+            progressElement.style.width = '0%';
+            itemElement.classList.remove('active');
+        }
+    }
+    
+    // Update total time
+    updateTotalTime();
+}
+
+function updateTotalTime() {
+    const data = SessionManager.loadTodaySessions();
+    let totalMs = 0;
+    
+    data.sessions.forEach(session => {
+        if (session.endTime) {
+            // Completed session
+            totalMs += new Date(session.endTime) - new Date(session.startTime);
+        } else if (currentSessionIndex !== null) {
+            // Active session
+            totalMs += Date.now() - new Date(session.startTime);
+        }
+    });
+    
+    document.getElementById('total-time').textContent = formatTime(totalMs);
+}
+
 function startSession() {
     sessionStartTime = new Date();
+    
+    // Check for existing active session
+    const existing = SessionManager.getCurrentSession();
+    if (existing) {
+        // Resume existing session
+        currentSessionIndex = existing.index;
+        sessionStartTime = new Date(existing.session.startTime);
+    } else {
+        // Create new session
+        currentSessionIndex = SessionManager.addSession(sessionStartTime);
+        if (currentSessionIndex === null) {
+            return; // Max sessions reached
+        }
+    }
     
     // Initialize arcs
     updateSessionArcs();
@@ -108,13 +266,16 @@ function startSession() {
     document.getElementById('reset-btn').style.display = 'inline-block';
     document.getElementById('session-info').style.display = 'block';
     
+    // Update daily sessions display
+    updateDailySessions();
+    
     // Start session timer
     sessionInterval = setInterval(updateSessionProgress, 1000);
     updateSessionProgress();
 }
 
 function updateSessionProgress() {
-    if (!sessionStartTime) return;
+    if (!sessionStartTime || currentSessionIndex === null) return;
     
     const now = new Date();
     const elapsed = now - sessionStartTime;
@@ -132,6 +293,12 @@ function updateSessionProgress() {
     const progress = (elapsed / SESSION_DURATION) * 100;
     document.getElementById('progress-percent').textContent = `${Math.floor(progress)}%`;
     document.getElementById('progress-fill').style.width = `${progress}%`;
+    
+    // Update session in storage
+    SessionManager.updateSession(currentSessionIndex, { progress });
+    
+    // Update daily sessions display
+    updateDailySessions();
     
     // Format times
     const elapsedStr = formatTime(elapsed);
@@ -156,7 +323,16 @@ function endSession() {
         sessionInterval = null;
     }
     
+    // Mark session as complete in storage
+    if (currentSessionIndex !== null) {
+        SessionManager.updateSession(currentSessionIndex, { 
+            endTime: new Date().toISOString(),
+            progress: 100
+        });
+    }
+    
     sessionStartTime = null;
+    currentSessionIndex = null;
     
     // Hide both session arcs
     document.getElementById('session-arc-elapsed').style.opacity = '0';
@@ -171,6 +347,9 @@ function endSession() {
     // Reset progress
     document.getElementById('progress-fill').style.width = '0%';
     document.getElementById('progress-percent').textContent = '0%';
+    
+    // Update daily sessions display
+    updateDailySessions();
 }
 
 function resetSession() {
@@ -182,6 +361,34 @@ document.addEventListener('DOMContentLoaded', () => {
     // Start clock
     updateClock();
     clockInterval = setInterval(updateClock, 1000);
+    
+    // Load and display today's sessions
+    updateDailySessions();
+    
+    // Check for active session on load
+    const activeSession = SessionManager.getCurrentSession();
+    if (activeSession) {
+        // Resume active session
+        currentSessionIndex = activeSession.index;
+        sessionStartTime = new Date(activeSession.session.startTime);
+        
+        // Check if session should have ended
+        const elapsed = Date.now() - sessionStartTime;
+        if (elapsed >= SESSION_DURATION) {
+            endSession();
+        } else {
+            // Resume UI state
+            document.getElementById('start-btn').style.display = 'none';
+            document.getElementById('end-btn').style.display = 'inline-block';
+            document.getElementById('reset-btn').style.display = 'inline-block';
+            document.getElementById('session-info').style.display = 'block';
+            
+            // Resume timer
+            sessionInterval = setInterval(updateSessionProgress, 1000);
+            updateSessionProgress();
+            updateSessionArcs();
+        }
+    }
     
     // Add event listeners
     document.getElementById('start-btn').addEventListener('click', startSession);

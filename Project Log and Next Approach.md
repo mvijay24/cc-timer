@@ -92,7 +92,84 @@
   - Progress bar now uses same blue color for consistency
   - Progress percentage text also uses blue color
 
+### Daily Sessions Table Feature
+- **Requirements:**
+  - Right side table showing 5 session slots (max possible in 24 hours)
+  - Each slot shows: progress bar, start time (12hr format)
+  - Daily reset based on Claude server time
+  - Session persistence across app restarts
+  - Background tracking when minimized
+
+- **Implementation Complete:**
+  - ✅ Added right sidebar with 5 session slots
+  - ✅ Each slot shows session number, start time (12hr), progress bar
+  - ✅ Progress bars use same green/blue color scheme
+  - ✅ LocalStorage integration with SessionManager
+  - ✅ Daily reset based on UTC date
+  - ✅ Session persistence - resumes on app restart
+  - ✅ Total time tracking for the day
+  - ✅ Active session highlighting
+  - ✅ Automatic session completion after 5 hours
+  - ✅ Window width increased to 1000px to accommodate sidebar
+
 ## Current Feature Approaches
+
+### Approach 1: LocalStorage + Interval Tracking
+**Implementation:**
+- Use localStorage to persist session data
+- Store array of sessions: [{startTime, endTime, progress}]
+- Update every second even when minimized
+- Daily reset at midnight UTC
+
+**Pros:**
+- Simple implementation
+- Works across browser sessions
+- No server needed
+
+**Cons:**
+- Limited to 5-10MB storage
+- Can't track when browser fully closed
+
+### Approach 2: IndexedDB + Service Worker
+**Implementation:**
+- IndexedDB for larger data storage
+- Service Worker for background tracking
+- Push notifications when session ends
+
+**Pros:**
+- True background processing
+- Larger storage capacity
+- Works when app closed
+
+**Cons:**
+- Complex implementation
+- Service Worker setup needed
+- HTTPS required
+
+### Approach 3: Electron IPC + Node.js
+**Implementation:**
+- Main process tracks sessions
+- Renderer process shows UI
+- System tray keeps app running
+
+**Pros:**
+- True desktop app behavior
+- Full system integration
+- Reliable background tracking
+
+**Cons:**
+- Requires Electron (not Tauri)
+- Larger app size
+- Platform specific code
+
+### Recommended: Approach 1 (LocalStorage)
+For current HTML/Tauri setup, localStorage is best:
+1. Simple to implement
+2. Works with current architecture
+3. Sufficient for 5 sessions/day
+4. Can upgrade later if needed
+
+## Previous Feature Approaches
 
 ### Approach 1: Electron + React
 **Pros:**

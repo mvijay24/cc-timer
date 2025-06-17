@@ -36,7 +36,7 @@
     "windows": [
       {
         "title": "CC Timer - Session Clock",
-        "width": 600,
+        "width": 1000,
         "height": 800,
         "resizable": false,
         "fullscreen": false,
