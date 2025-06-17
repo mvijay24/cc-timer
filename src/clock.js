@@ -227,12 +227,12 @@ function updateTotalTime() {
     const data = SessionManager.loadTodaySessions();
     let totalMs = 0;
     
-    data.sessions.forEach(session => {
+    data.sessions.forEach((session, index) => {
         if (session.endTime) {
             // Completed session
             totalMs += new Date(session.endTime) - new Date(session.startTime);
-        } else if (currentSessionIndex !== null) {
-            // Active session
+        } else if (index === currentSessionIndex) {
+            // Only add time for the currently active session
             totalMs += Date.now() - new Date(session.startTime);
         }
     });
@@ -289,8 +289,17 @@ function updateSessionProgress() {
         // Session complete - show 100% progress before ending
         document.getElementById('progress-percent').textContent = '100%';
         document.getElementById('progress-fill').style.width = '100%';
-        SessionManager.updateSession(currentSessionIndex, { progress: 100 });
+        SessionManager.updateSession(currentSessionIndex, { 
+            progress: 100,
+            endTime: new Date().toISOString() // Mark as complete immediately
+        });
         updateDailySessions();
+        
+        // Clear interval before timeout
+        if (sessionInterval) {
+            clearInterval(sessionInterval);
+            sessionInterval = null;
+        }
         
         // Wait a moment to show completion
         setTimeout(() => {
